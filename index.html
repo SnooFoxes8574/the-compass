@@ -804,11 +804,30 @@ async function shareFind() {
 
 /* ---------- match ticker: schedule-based, no live data ---------- */
 const WC_FIXTURES = [[1781204400,"Mexico","South Africa"],[1781229600,"Korea Republic","Czechia"],[1781290800,"Canada","Bosnia and Herzegovina"],[1781312400,"USA","Paraguay"],[1781377200,"Qatar","Switzerland"],[1781388000,"Brazil","Morocco"],[1781398800,"Haiti","Scotland"],[1781409600,"Australia","Türkiye"],[1781456400,"Germany","Curaçao"],[1781467200,"Netherlands","Japan"],[1781478000,"Côte d'Ivoire","Ecuador"],[1781488800,"Sweden","Tunisia"],[1781539200,"Spain","Cabo Verde"],[1781550000,"Belgium","Egypt"],[1781560800,"Saudi Arabia","Uruguay"],[1781571600,"IR Iran","New Zealand"],[1781636400,"France","Senegal"],[1781647200,"Iraq","Norway"],[1781658000,"Argentina","Algeria"],[1781668800,"Austria","Jordan"],[1781715600,"Portugal","Congo DR"],[1781726400,"England","Croatia"],[1781737200,"Ghana","Panama"],[1781748000,"Uzbekistan","Colombia"],[1781798400,"Czechia","South Africa"],[1781809200,"Switzerland","Bosnia and Herzegovina"],[1781820000,"Canada","Qatar"],[1781830800,"Mexico","Korea Republic"],[1781895600,"USA","Australia"],[1781906400,"Scotland","Morocco"],[1781917200,"Brazil","Haiti"],[1781928000,"Türkiye","Paraguay"],[1781974800,"Netherlands","Sweden"],[1781985600,"Germany","Côte d'Ivoire"],[1782000000,"Ecuador","Curaçao"],[1782014400,"Tunisia","Japan"],[1782057600,"Spain","Saudi Arabia"],[1782068400,"Belgium","IR Iran"],[1782079200,"Uruguay","Cabo Verde"],[1782090000,"New Zealand","Egypt"],[1782147600,"Argentina","Austria"],[1782162000,"France","Iraq"],[1782172800,"Norway","Senegal"],[1782183600,"Jordan","Algeria"],[1782234000,"Portugal","Uzbekistan"],[1782244800,"England","Ghana"],[1782255600,"Panama","Croatia"],[1782266400,"Colombia","Congo DR"],[1782327600,"Switzerland","Canada"],[1782327600,"Bosnia and Herzegovina","Qatar"],[1782338400,"Scotland","Brazil"],[1782338400,"Morocco","Haiti"],[1782349200,"Czechia","Mexico"],[1782349200,"South Africa","Korea Republic"],[1782417600,"Curaçao","Côte d'Ivoire"],[1782417600,"Ecuador","Germany"],[1782428400,"Japan","Sweden"],[1782428400,"Tunisia","Netherlands"],[1782439200,"Türkiye","USA"],[1782439200,"Paraguay","Australia"],[1782500400,"Norway","France"],[1782500400,"Senegal","Iraq"],[1782518400,"Cabo Verde","Saudi Arabia"],[1782518400,"Uruguay","Spain"],[1782529200,"Egypt","IR Iran"],[1782529200,"New Zealand","Belgium"],[1782594000,"Panama","England"],[1782594000,"Croatia","Ghana"],[1782603000,"Colombia","Portugal"],[1782603000,"Congo DR","Uzbekistan"],[1782612000,"Algeria","Austria"],[1782612000,"Jordan","Argentina"],[1782673200,"","","Round of 32"],[1782752400,"","","Round of 32"],[1782765000,"","","Round of 32"],[1782781200,"","","Round of 32"],[1782838800,"","","Round of 32"],[1782853200,"","","Round of 32"],[1782867600,"","","Round of 32"],[1782921600,"","","Round of 32"],[1782936000,"","","Round of 32"],[1782950400,"","","Round of 32"],[1783018800,"","","Round of 32"],[1783033200,"","","Round of 32"],[1783047600,"","","Round of 32"],[1783101600,"","","Round of 32"],[1783116000,"","","Round of 32"],[1783128600,"","","Round of 32"],[1783184400,"","","Round of 16"],[1783198800,"","","Round of 16"],[1783281600,"","","Round of 16"],[1783296000,"","","Round of 16"],[1783364400,"","","Round of 16"],[1783382400,"","","Round of 16"],[1783440000,"","","Round of 16"],[1783454400,"","","Round of 16"],[1783627200,"","","Quarter-final"],[1783710000,"","","Quarter-final"],[1783803600,"","","Quarter-final"],[1783818000,"","","Quarter-final"],[1784055600,"","","Semi-final"],[1784142000,"","","Semi-final"],[1784408400,"","","Third-place play-off"],[1784487600,"","","The Final"]];
+// FIFA trigramme + emoji flag per qualified team (renders natively on iOS/Android)
+const TEAMS = {
+  'Algeria':['ALG','🇩🇿'],'Argentina':['ARG','🇦🇷'],'Australia':['AUS','🇦🇺'],'Austria':['AUT','🇦🇹'],
+  'Belgium':['BEL','🇧🇪'],'Bosnia and Herzegovina':['BIH','🇧🇦'],'Brazil':['BRA','🇧🇷'],'Cabo Verde':['CPV','🇨🇻'],
+  'Canada':['CAN','🇨🇦'],'Colombia':['COL','🇨🇴'],'Congo DR':['COD','🇨🇩'],'Croatia':['CRO','🇭🇷'],
+  'Curaçao':['CUW','🇨🇼'],'Czechia':['CZE','🇨🇿'],"Côte d'Ivoire":['CIV','🇨🇮'],'Ecuador':['ECU','🇪🇨'],
+  'Egypt':['EGY','🇪🇬'],'England':['ENG','🏴󠁧󠁢󠁥󠁮󠁧󠁿'],'France':['FRA','🇫🇷'],'Germany':['GER','🇩🇪'],
+  'Ghana':['GHA','🇬🇭'],'Haiti':['HAI','🇭🇹'],'IR Iran':['IRN','🇮🇷'],'Iraq':['IRQ','🇮🇶'],
+  'Japan':['JPN','🇯🇵'],'Jordan':['JOR','🇯🇴'],'Korea Republic':['KOR','🇰🇷'],'Mexico':['MEX','🇲🇽'],
+  'Morocco':['MAR','🇲🇦'],'Netherlands':['NED','🇳🇱'],'New Zealand':['NZL','🇳🇿'],'Norway':['NOR','🇳🇴'],
+  'Panama':['PAN','🇵🇦'],'Paraguay':['PAR','🇵🇾'],'Portugal':['POR','🇵🇹'],'Qatar':['QAT','🇶🇦'],
+  'Saudi Arabia':['KSA','🇸🇦'],'Scotland':['SCO','🏴󠁧󠁢󠁳󠁣󠁴󠁿'],'Senegal':['SEN','🇸🇳'],'South Africa':['RSA','🇿🇦'],
+  'Spain':['ESP','🇪🇸'],'Sweden':['SWE','🇸🇪'],'Switzerland':['SUI','🇨🇭'],'Tunisia':['TUN','🇹🇳'],
+  'Türkiye':['TUR','🇹🇷'],'USA':['USA','🇺🇸'],'Uruguay':['URU','🇺🇾'],'Uzbekistan':['UZB','🇺🇿'],
+};
 const MATCH_WINDOW_MS = 115 * 60 * 1000; // kickoff → ~full time incl. half-time
 let tickerTimer = null;
 let tickerCycle = 0;
 
-function fixtureName(f) { return f[1] ? f[1] + ' v ' + f[2] : f[3]; }
+function teamLabel(name) {
+  const t = TEAMS[name];
+  return t ? t[1] + ' ' + t[0] : name;
+}
+function fixtureName(f) { return f[1] ? teamLabel(f[1]) + ' v ' + teamLabel(f[2]) : f[3]; }
 function estMinute(koMs, nowMs) {
   // estimated from the clock, not live data — hence the "ish"
   const m = Math.floor((nowMs - koMs) / 60000);
