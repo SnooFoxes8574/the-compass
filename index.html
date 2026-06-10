@@ -3,44 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>The Compass — find the nearest match. By Madison.</title>
-<meta name="description" content="A compass that points you to the nearest sports bar showing the match. By Madison.">
-<meta property="og:title" content="The Compass — find the nearest match. By Madison.">
+<title>Goal Compass — find the nearest match. Made with Madison.</title>
+<meta name="description" content="A compass that points you to the nearest sports bar showing the match. Made with Madison.">
+<meta property="og:title" content="Goal Compass — find the nearest match. Made with Madison.">
 <meta property="og:description" content="Open on your phone, grant location, follow the arrow. It points at the nearest sports bar showing the match.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="The Compass — find the nearest match. By Madison.">
+<meta name="twitter:title" content="Goal Compass — find the nearest match. Made with Madison.">
 <meta name="twitter:description" content="Open on your phone, grant location, follow the arrow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   BRAND THEME — swap these to restyle the whole thing.
+   MATCHDAY THEME — swap these to restyle the whole thing.
    ============================================================ */
 :root {
-  --brand-color: #2fd566;          /* pitch green */
-  --bg: #08130c;                   /* floodlit night */
-  --text: #f3fff6;                 /* chalk white */
-  --accent: #ffd84d;               /* referee-card yellow */
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --bg: #F2E8CF;            /* paper cream */
+  --ink: #1C1B19;           /* ink */
+  --accent: #E8530E;        /* terrace orange */
+  --accent-2: #2D6CA2;      /* sky blue */
+  --accent-3: #E0A82E;      /* ochre */
+  --green: #2E5E3A;         /* pitch green, sparing */
+  --card: #FBF6E8;          /* sticker-card cream-white */
+  --font-display: 'Anton', 'Arial Narrow', sans-serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+  --font-body: 'Space Grotesk', -apple-system, sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; }
 body {
-  font-family: var(--font);
+  font-family: var(--font-body);
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-/* stadium floodlight glow */
+/* halftone print texture + faint paper grain */
 body::before {
   content: "";
   position: fixed; inset: 0;
+  background-image: radial-gradient(circle, var(--ink) 1px, transparent 1.1px);
+  background-size: 9px 9px;
+  opacity: .055;
+  pointer-events: none;
+  z-index: 1;
+}
+/* ghosted pitch markings: centre circle + halfway line */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
   background:
-    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(47,213,102,.22), transparent 60%),
-    radial-gradient(ellipse 70% 45% at 50% 115%, rgba(47,213,102,.10), transparent 60%);
+    radial-gradient(circle at 50% 50%, transparent 138px, rgba(28,27,25,.07) 139px, rgba(28,27,25,.07) 141px, transparent 142px),
+    linear-gradient(to bottom, transparent calc(50% - 1px), rgba(28,27,25,.07) calc(50% - 1px), rgba(28,27,25,.07) calc(50% + 1px), transparent calc(50% + 1px));
   pointer-events: none;
 }
 
@@ -51,179 +69,274 @@ body::before {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 24px 28px calc(64px + env(safe-area-inset-bottom));
-  gap: 18px;
+  padding: 24px 26px calc(62px + env(safe-area-inset-bottom));
+  gap: 16px;
+  z-index: 2;
 }
 .screen.active { display: flex; }
 
-.kicker {
-  font-size: 12px;
-  letter-spacing: .28em;
-  text-transform: uppercase;
-  color: var(--brand-color);
-  font-weight: 700;
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: .22em;
+  color: var(--ink);
+  display: flex; align-items: center; gap: 10px;
 }
-h1 { font-size: clamp(34px, 9vw, 52px); font-weight: 800; line-height: 1.05; letter-spacing: -.02em; }
-.pitch-line { font-size: 17px; line-height: 1.5; color: var(--text); opacity: .82; max-width: 30ch; }
+.wordmark .mini-ball { width: 20px; height: 20px; }
 
+h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(38px, 10.5vw, 58px);
+  line-height: 1.04;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+}
+.body-copy { font-size: 16px; line-height: 1.55; opacity: .85; max-width: 32ch; }
+.mono { font-family: var(--font-mono); }
+
+/* ---------- ticket-stub buttons ---------- */
 .btn {
-  appearance: none; border: none; cursor: pointer;
-  font-family: var(--font);
-  font-size: 19px; font-weight: 800;
+  appearance: none; cursor: pointer;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
   color: var(--bg);
-  background: var(--brand-color);
-  padding: 18px 40px;
+  background: var(--accent);
+  border: 2px solid var(--ink);
   border-radius: 999px;
-  margin-top: 10px;
-  box-shadow: 0 0 36px rgba(47,213,102,.45);
-  transition: transform .12s ease;
+  padding: 16px 38px;
+  margin-top: 8px;
+  box-shadow: 3px 3px 0 var(--ink);   /* screen-print offset */
+  transition: transform .1s ease, box-shadow .1s ease;
 }
-.btn:active { transform: scale(.96); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 .btn-ghost {
-  background: transparent;
-  color: var(--text);
-  box-shadow: none;
-  border: 1.5px solid rgba(243,255,246,.3);
-  font-size: 14px; font-weight: 600;
-  padding: 10px 20px;
-  margin-top: 0;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 400;
+  padding: 11px 20px;
+  box-shadow: 2px 2px 0 var(--ink);
 }
+
+/* ---------- sticker card (Panini frame) ---------- */
+.sticker {
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 4px 4px 0 rgba(28,27,25,.18);
+  max-width: 34ch;
+}
+
+/* ---------- landing ---------- */
+.reassure { font-family: var(--font-mono); font-size: 12px; opacity: .55; }
+/* permission prime overlay */
+#prime {
+  position: fixed; inset: 0;
+  display: none;
+  align-items: center; justify-content: center;
+  background: rgba(28,27,25,.35);
+  z-index: 20;
+  padding: 28px;
+}
+#prime.active { display: flex; }
+#prime .sticker { display: flex; flex-direction: column; gap: 14px; text-align: center; }
 
 /* ---------- compass screen ---------- */
-#screen-compass { justify-content: space-between; padding-top: max(28px, env(safe-area-inset-top)); }
-.compass-top { display: flex; flex-direction: column; gap: 4px; }
+#screen-compass { justify-content: space-between; padding-top: max(24px, env(safe-area-inset-top)); }
 .compass-wrap {
   position: relative;
-  width: min(78vw, 46vh);
+  width: min(76vw, 42vh);
   aspect-ratio: 1;
 }
-/* centre-circle dial, chalk on grass */
+/* printed dial: ink ring, halftone fill, compass-rose ticks */
 .dial {
   position: absolute; inset: 0;
   border-radius: 50%;
-  border: 3px solid rgba(243,255,246,.85);
-  box-shadow:
-    inset 0 0 0 10px rgba(243,255,246,.05),
-    0 0 60px rgba(47,213,102,.18);
+  border: 2.5px solid var(--ink);
   background:
-    radial-gradient(circle at 50% 50%, rgba(47,213,102,.14), rgba(47,213,102,.03) 70%);
+    radial-gradient(circle, rgba(28,27,25,.22) .8px, transparent .9px) 0 0 / 7px 7px,
+    var(--card);
+  box-shadow: 4px 4px 0 rgba(28,27,25,.15), inset 0 0 0 8px var(--card), inset 0 0 0 9.5px rgba(28,27,25,.35);
 }
-.dial .tick {
-  position: absolute; top: 8px; left: 50%;
-  width: 2px; height: 10px;
-  background: rgba(243,255,246,.5);
-  transform-origin: 50% calc(min(78vw, 46vh)/2 - 8px);
+/* rotating compass rose (counter-rotates with heading, like a real compass) */
+#rose {
+  position: absolute; inset: 0;
+  will-change: transform;
 }
-/* penalty spot */
-.dial::after {
-  content: "";
-  position: absolute; top: 50%; left: 50%;
-  width: 9px; height: 9px; border-radius: 50%;
-  background: rgba(243,255,246,.9);
-  transform: translate(-50%, -50%);
+#rose span {
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 13px; font-weight: 700;
+  color: rgba(28,27,25,.55);
 }
+#rose .r-n { color: var(--accent); }
+#rose .r-e { top: 50%; left: auto; right: 12px; transform: translateY(-50%); }
+#rose .r-s { top: auto; bottom: 12px; }
+#rose .r-w { top: 50%; left: 12px; transform: translateY(-50%); }
 #arrow {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  transition: transform .25s ease-out;
   will-change: transform;
 }
-#arrow svg { width: 62%; height: 62%; overflow: visible; }
-.compass-wrap.locked .dial { animation: lockpulse 1.2s ease-in-out infinite; }
-@keyframes lockpulse {
-  0%, 100% { box-shadow: inset 0 0 0 10px rgba(243,255,246,.05), 0 0 60px rgba(47,213,102,.18); }
-  50%      { box-shadow: inset 0 0 0 10px rgba(243,255,246,.05), 0 0 90px rgba(47,213,102,.55); }
+#arrow svg { width: 64%; height: 64%; overflow: visible; }
+.compass-wrap.locked .dial { border-color: var(--accent); }
+.compass-wrap.locked #arrow { animation: lockbob 1s ease-in-out infinite; }
+@keyframes lockbob { 0%,100% { scale: 1; } 50% { scale: 1.04; } }
+
+.bar-block { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+#bar-name {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 6vw, 27px);
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  line-height: 1.15;
+  padding: 12px 22px;
 }
-.bar-info { display: flex; flex-direction: column; gap: 6px; }
-#bar-name { font-size: clamp(22px, 6.5vw, 30px); font-weight: 800; line-height: 1.15; }
-#bar-distance { font-size: 16px; color: var(--accent); font-weight: 700; }
-#bar-hint { font-size: 13px; opacity: .6; }
+#bar-distance {
+  font-family: var(--font-mono);
+  font-size: 15px; font-weight: 700;
+  color: var(--accent-2);
+}
+#bar-hint { font-size: 13px; opacity: .6; max-width: 36ch; min-height: 2.6em; }
 .compass-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
-/* ---------- loading ---------- */
-.ball {
-  width: 54px; height: 54px;
-  animation: bounce 0.9s cubic-bezier(.5,0,.7,1) infinite alternate;
+/* ---------- loading: spinning Telstar ---------- */
+.telstar { width: 64px; height: 64px; animation: spin 1.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading-line { font-family: var(--font-mono); font-size: 14px; min-height: 3em; max-width: 30ch; }
+
+/* ---------- GOAL screen ---------- */
+#screen-goal h1 { font-size: clamp(72px, 24vw, 130px); color: var(--accent); text-shadow: 4px 4px 0 var(--accent-3); }
+.confetti {
+  position: fixed; top: -16px;
+  width: 10px; height: 14px;
+  z-index: 1;
+  animation: fall linear forwards;
 }
-@keyframes bounce { from { transform: translateY(-18px); } to { transform: translateY(14px) ; } }
-#loading-line { min-height: 3em; }
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); }
+}
 
 /* ---------- desktop ---------- */
+#bunting { position: fixed; top: 0; left: 0; right: 0; height: 70px; z-index: 3; pointer-events: none; }
 #qr-box {
   background: #fff;
-  padding: 14px;
-  border-radius: 16px;
+  border: 2px solid var(--ink);
+  padding: 12px;
+  border-radius: 10px;
   line-height: 0;
-  box-shadow: 0 0 50px rgba(47,213,102,.3);
+  box-shadow: 5px 5px 0 rgba(28,27,25,.2);
 }
-#qr-box img { width: 200px; height: 200px; }
+#qr-box img { width: 190px; height: 190px; }
 .url-chip {
-  font-size: 14px;
-  color: var(--accent);
-  border: 1px dashed rgba(255,216,77,.5);
-  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  padding: 9px 18px;
   border-radius: 999px;
+  box-shadow: 2px 2px 0 var(--ink);
   word-break: break-all;
 }
 
 /* ---------- error ---------- */
-.error-emoji { font-size: 56px; line-height: 1; }
+.error-emoji { font-size: 50px; line-height: 1; }
+#error-title { font-size: clamp(28px, 8vw, 40px); }
+.maps-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-2);
+}
 
-/* ---------- Madison credit, on every screen ---------- */
+/* ---------- Made with Madison lockup, every screen ---------- */
 #credit {
   position: fixed;
-  bottom: calc(16px + env(safe-area-inset-bottom));
+  bottom: calc(14px + env(safe-area-inset-bottom));
   left: 0; right: 0;
   text-align: center;
+  font-family: var(--font-mono);
   font-size: 12px;
-  letter-spacing: .12em;
   z-index: 10;
 }
-#credit a { color: var(--text); opacity: .55; text-decoration: none; }
-#credit a strong { color: var(--brand-color); font-weight: 800; }
+#credit a { color: var(--ink); opacity: .65; text-decoration: none; }
+#credit a strong { color: var(--accent); font-weight: 700; }
 </style>
 </head>
 <body>
 
-<!-- LANDING -->
+<!-- Telstar ball, reused -->
+<svg style="display:none">
+  <defs>
+    <g id="telstar-src">
+      <circle cx="50" cy="50" r="47" fill="#fff" stroke="#1C1B19" stroke-width="4"/>
+      <polygon points="50,30 69,44 62,66 38,66 31,44" fill="#1C1B19"/>
+      <polygon points="50,3 58,18 42,18" fill="#1C1B19"/>
+      <polygon points="93,35 80,28 84,46" fill="#1C1B19"/>
+      <polygon points="80,84 68,75 84,68" fill="#1C1B19"/>
+      <polygon points="20,84 32,75 16,68" fill="#1C1B19"/>
+      <polygon points="7,35 20,28 16,46" fill="#1C1B19"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- LANDING — The Kickoff -->
 <section class="screen active" id="screen-landing">
-  <div class="kicker" data-brand-kicker>The Compass</div>
-  <h1>Every match has a home.<br>Find yours.</h1>
-  <p class="pitch-line">A compass that points at the nearest sports bar. Grant location &amp; motion, then follow the arrow.</p>
+  <div class="wordmark">GOAL COMPASS
+    <svg class="mini-ball" viewBox="0 0 100 100"><use href="#telstar-src"/></svg>
+  </div>
+  <h1>Every match has a home. Find yours.</h1>
+  <p class="body-copy">A compass that points to the nearest bar showing the game. Switch on location and motion, then follow the arrow to your lot.</p>
   <button class="btn" id="btn-start">Find the match</button>
-  <p class="pitch-line" style="font-size:13px;opacity:.5;">No login. No app. No offside trap.</p>
+  <p class="reassure">No login. No app. No offside trap.</p>
 </section>
 
-<!-- LOADING -->
+<!-- PERMISSION PRIME -->
+<div id="prime">
+  <div class="sticker">
+    <p class="body-copy" style="opacity:1">Two things, then you're in: your <strong>location</strong> (to find the bar) and <strong>motion</strong> (to point the way).</p>
+    <button class="btn" id="btn-kickoff">Kick off →</button>
+  </div>
+</div>
+
+<!-- LOADING — VAR Check -->
 <section class="screen" id="screen-loading">
-  <svg class="ball" viewBox="0 0 100 100" aria-hidden="true">
-    <circle cx="50" cy="50" r="46" fill="var(--text)"/>
-    <path d="M50 28 L70 42 L62 66 L38 66 L30 42 Z" fill="var(--bg)"/>
-    <path d="M50 4 L50 28 M70 42 L93 35 M62 66 L76 88 M38 66 L24 88 M30 42 L7 35" stroke="var(--bg)" stroke-width="5" fill="none"/>
-  </svg>
-  <p class="pitch-line" id="loading-line">Locating the nearest match…</p>
+  <svg class="telstar" viewBox="0 0 100 100"><use href="#telstar-src"/></svg>
+  <p id="loading-line">VAR is checking your location…</p>
 </section>
 
-<!-- COMPASS -->
+<!-- MAIN COMPASS — The Bearing -->
 <section class="screen" id="screen-compass">
-  <div class="compass-top">
-    <div class="kicker" data-brand-kicker>The Compass</div>
+  <div class="wordmark">GOAL COMPASS
+    <svg class="mini-ball" viewBox="0 0 100 100"><use href="#telstar-src"/></svg>
   </div>
   <div class="compass-wrap" id="compass-wrap">
-    <div class="dial" id="dial"></div>
+    <div class="dial"></div>
+    <div id="rose">
+      <span class="r-n">N</span><span class="r-e">E</span><span class="r-s">S</span><span class="r-w">W</span>
+    </div>
     <div id="arrow">
       <svg viewBox="0 0 100 100" aria-hidden="true">
-        <!-- corner-flag compass needle -->
-        <polygon points="50,-6 64,52 50,42 36,52" fill="var(--brand-color)" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>
-        <polygon points="50,42 60,50 50,94 40,50" fill="rgba(243,255,246,.25)"/>
-        <line x1="50" y1="42" x2="50" y2="94" stroke="rgba(243,255,246,.5)" stroke-width="2"/>
+        <!-- terrace-orange pennant needle with misregistered print shadow -->
+        <g transform="translate(2.2,2.2)" opacity=".55">
+          <polygon points="50,-4 63,48 50,39 37,48" fill="var(--accent-2)"/>
+        </g>
+        <polygon points="50,-4 63,48 50,39 37,48" fill="var(--accent)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+        <line x1="50" y1="39" x2="50" y2="86" stroke="var(--ink)" stroke-width="2.5"/>
+        <circle cx="50" cy="86" r="4" fill="var(--ink)"/>
       </svg>
     </div>
   </div>
-  <div class="bar-info">
-    <div id="bar-name">…</div>
+  <div class="bar-block">
+    <div class="sticker" id="bar-name">…</div>
     <div id="bar-distance">…</div>
-    <div id="bar-hint">Follow the arrow. Trust the arrow.</div>
+    <div id="bar-hint">Walk with purpose. You're on in five.</div>
   </div>
   <div class="compass-controls">
     <button class="btn btn-ghost" id="btn-next">Next bar →</button>
@@ -231,25 +344,42 @@ h1 { font-size: clamp(34px, 9vw, 52px); font-weight: 800; line-height: 1.05; let
   </div>
 </section>
 
+<!-- GOAL — Arrival + Share -->
+<section class="screen" id="screen-goal">
+  <h1>GOAL.</h1>
+  <div class="sticker">
+    <p class="body-copy" style="opacity:1">You found your lot. Get inside before kickoff.</p>
+  </div>
+  <button class="btn" id="btn-share">Share your find</button>
+  <button class="btn btn-ghost" id="btn-back">← Back to the compass</button>
+</section>
+
 <!-- ERROR -->
 <section class="screen" id="screen-error">
   <div class="error-emoji" id="error-emoji">🟥</div>
-  <h1 id="error-title" style="font-size:clamp(24px,7vw,34px);">Red card.</h1>
-  <p class="pitch-line" id="error-msg"></p>
+  <h1 id="error-title">Red card.</h1>
+  <div class="sticker"><p class="body-copy" id="error-msg" style="opacity:1"></p></div>
   <button class="btn" id="btn-retry">Try again</button>
 </section>
 
-<!-- DESKTOP -->
+<!-- DESKTOP — For Your Pocket -->
 <section class="screen" id="screen-desktop">
-  <div class="kicker" data-brand-kicker>The Compass</div>
+  <div class="wordmark">GOAL COMPASS
+    <svg class="mini-ball" viewBox="0 0 100 100"><use href="#telstar-src"/></svg>
+  </div>
   <h1>This one's for<br>your pocket.</h1>
-  <p class="pitch-line">The Compass points your phone at the nearest sports bar showing the match. Laptops don't have compasses — scan to play.</p>
+  <p class="body-copy">Goal Compass points your phone at the nearest sports bar showing the match. Laptops don't have compasses — scan to play.</p>
   <div id="qr-box"></div>
   <div class="url-chip" id="url-chip"></div>
 </section>
 
-<!-- Madison credit (persistent) -->
-<div id="credit"><a href="https://www.madewithmadison.com" target="_blank" rel="noopener">by <strong id="credit-name">Madison</strong></a></div>
+<!-- bunting (desktop only, injected) -->
+<svg id="bunting" preserveAspectRatio="none" viewBox="0 0 1200 70" style="display:none">
+  <path d="M0,12 Q600,38 1200,12" stroke="#1C1B19" stroke-width="2.5" fill="none"/>
+</svg>
+
+<!-- Made with Madison (persistent) -->
+<div id="credit"><a href="https://www.madewithmadison.com" target="_blank" rel="noopener">Made with <strong id="credit-name">Madison</strong></a></div>
 
 <script>
 'use strict';
@@ -257,31 +387,37 @@ h1 { font-size: clamp(34px, 9vw, 52px); font-weight: 800; line-height: 1.05; let
    BRAND — swap in one place.
    ============================================================ */
 const BRAND_NAME = 'Madison';
-
+const APP_NAME = 'Goal Compass';
 document.getElementById('credit-name').textContent = BRAND_NAME;
 
 /* ---------- tiny screen router ---------- */
-const screens = ['landing','loading','compass','error','desktop'];
+const screens = ['landing','loading','compass','goal','error','desktop'];
 function show(name) {
   screens.forEach(s => document.getElementById('screen-' + s).classList.toggle('active', s === name));
 }
 
 /* ---------- copy deck ---------- */
 const LOADING_LINES = [
-  'Locating the nearest match…',
   'VAR is checking your location…',
-  'Finding your people…',
-  'Warming up the subs…',
-  'Asking the fourth official…',
+  'Consulting the linesman…',
+  'Checking you’re not offside…',
+  'Finding your lot…',
+];
+const COMPASS_HINTS = [
+  'Walk with purpose. You’re on in five.',
+  'Your lot’s already there.',
+  'Mind the puddles.',
+  'Kickoff waits for no one.',
 ];
 const ERRORS = {
-  locationDenied: { emoji: '🟥', title: 'No location, no match.', msg: 'The Compass can’t point you anywhere without your location. Allow location access in your browser settings, then try again.' },
-  locationFailed: { emoji: '📡', title: 'GPS is having an off day.', msg: 'We couldn’t pin you down. Step near a window (or out of the tunnel) and try again.' },
-  motionDenied:   { emoji: '🧭', title: 'The arrow needs your compass.', msg: 'Motion & orientation access was declined, so the needle can’t spin. Reload and tap Allow this time — we believe in you.' },
-  noBars:         { emoji: '🏟️', title: 'Away game, sorry.', msg: 'No bars or pubs within 2 km. Either you’re very remote or very disciplined. Move closer to civilisation and try again.' },
+  locationDenied: { emoji: '🟥', title: 'Hold on, ref.', msg: 'Can’t point you anywhere without knowing where you’re standing. Switch location on and we’ll find your lot.' },
+  locationFailed: { emoji: '📡', title: 'Signal’s gone to extra time.', msg: 'We couldn’t pin you down. Step near a window (or out of the tunnel) and try again.' },
+  noBars:         { emoji: '🏟️', title: 'Away game.', msg: 'No bars within range — looks like you’ve wandered into the away end. Try a bigger crowd.' },
   network:        { emoji: '📋', title: 'The scouts didn’t report back.', msg: 'We couldn’t reach the bar database. Probably a network hiccup — give it another go.' },
 };
 function showError(key) {
+  clearTimeout(watchdog);
+  stopLoadingLines();
   const e = ERRORS[key] || ERRORS.network;
   document.getElementById('error-emoji').textContent = e.emoji;
   document.getElementById('error-title').textContent = e.title;
@@ -296,9 +432,21 @@ if (!isMobile) {
   const url = location.href;
   document.getElementById('url-chip').textContent = url.replace(/^https?:\/\//, '');
   const img = new Image();
-  img.alt = 'QR code to open The Compass on your phone';
-  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&qzone=1&color=08130c&data=' + encodeURIComponent(url);
+  img.alt = 'QR code to open Goal Compass on your phone';
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&qzone=1&color=1C1B19&data=' + encodeURIComponent(url);
   document.getElementById('qr-box').appendChild(img);
+  // bunting across the top
+  const bunting = document.getElementById('bunting');
+  const colors = ['#E8530E', '#2D6CA2', '#E0A82E', '#2E5E3A'];
+  let tris = '';
+  for (let i = 0; i < 16; i++) {
+    const x = 20 + i * 75;
+    const sag = 12 + Math.sin((i / 15) * Math.PI) * 26;
+    tris += '<polygon points="' + (x - 18) + ',' + sag + ' ' + (x + 18) + ',' + sag + ' ' + x + ',' + (sag + 34) +
+            '" fill="' + colors[i % 4] + '" stroke="#1C1B19" stroke-width="1.5"/>';
+  }
+  bunting.innerHTML += tris;
+  bunting.style.display = 'block';
   show('desktop');
 }
 
@@ -320,7 +468,7 @@ function bearingTo(lat1, lon1, lat2, lon2) {
   return (th * 180 / Math.PI + 360) % 360;
 }
 function formatDistance(m) {
-  return m < 1000 ? Math.round(m) + ' m away' : (m / 1000).toFixed(1) + ' km away';
+  return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
 }
 function walkEta(m) {
   const min = Math.max(1, Math.round(m / 80)); // ~4.8 km/h
@@ -334,6 +482,7 @@ function cardinal(deg) {
 /* ---------- compass heading ---------- */
 let compassHeading = null;     // 0-360, degrees clockwise from north
 let headingEverReceived = false;
+let motionGranted = true;      // false → static map-direction fallback
 
 function getCompassHeading(e) {
   // iOS: degrees clockwise from true north, only exists on iOS
@@ -354,7 +503,6 @@ function onOrientation(e) {
   if (h == null) return;
   headingEverReceived = true;
   compassHeading = h;
-  requestArrowUpdate();
 }
 
 async function startCompass() {
@@ -383,16 +531,39 @@ function getPosition() {
   });
 }
 
-/* ---------- Overpass ---------- */
+/* ---------- Overpass, with timeouts + local cache ---------- */
+function fetchWithTimeout(url, opts, ms) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, Object.assign({}, opts, { signal: ctrl.signal }))
+    .finally(() => clearTimeout(t));
+}
+const BAR_CACHE_TTL = 10 * 60 * 1000;
+function cacheKey(lat, lon) { return 'gc-bars-' + lat.toFixed(3) + ',' + lon.toFixed(3); } // ~110 m grid
+function readBarCache(lat, lon) {
+  try {
+    const raw = localStorage.getItem(cacheKey(lat, lon));
+    if (!raw) return null;
+    const { t, elements } = JSON.parse(raw);
+    return (Date.now() - t < BAR_CACHE_TTL) ? elements : null;
+  } catch (e) { return null; }
+}
+function writeBarCache(lat, lon, elements) {
+  try { localStorage.setItem(cacheKey(lat, lon), JSON.stringify({ t: Date.now(), elements })); }
+  catch (e) { /* storage full or blocked — fine */ }
+}
 async function fetchBars(lat, lon) {
-  const q = `[out:json][timeout:25];
+  const cached = readBarCache(lat, lon);
+  if (cached) return cached;
+  // nodes AND ways — many bars are mapped as buildings, not points
+  const q = `[out:json][timeout:20];
 (
-  node["amenity"="bar"]["sport"](around:2000,${lat},${lon});
-  node["amenity"="pub"]["sport"](around:2000,${lat},${lon});
   node["amenity"="bar"](around:2000,${lat},${lon});
   node["amenity"="pub"](around:2000,${lat},${lon});
+  way["amenity"="bar"](around:2000,${lat},${lon});
+  way["amenity"="pub"](around:2000,${lat},${lon});
 );
-out body;`;
+out center;`;
   const endpoints = [
     'https://overpass-api.de/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
@@ -400,14 +571,16 @@ out body;`;
   let lastErr;
   for (const url of endpoints) {
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithTimeout(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'data=' + encodeURIComponent(q),
-      });
+      }, 12000);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
-      return json.elements || [];
+      const elements = json.elements || [];
+      writeBarCache(lat, lon, elements);
+      return elements;
     } catch (err) { lastErr = err; }
   }
   throw lastErr || new Error('overpass failed');
@@ -416,21 +589,25 @@ out body;`;
 /* ---------- bar selection ---------- */
 const SPORTY_NAME = /sport|stadium|fan|kick|goal|league|club house|tavern/i;
 let userPos = null;     // {lat, lon}
+let lastFetchPos = null;
 let barList = [];       // sorted by distance
 let barIndex = 0;
+let refetching = false;
 
 function buildBarList(elements, lat, lon) {
   const seen = new Set();
   const bars = [];
   for (const el of elements) {
-    if (el.type !== 'node' || seen.has(el.id)) continue;
-    seen.add(el.id);
+    const p = el.type === 'node' ? el : (el.center || null);
+    if (!p || seen.has(el.type + el.id)) continue;
+    seen.add(el.type + el.id);
     const tags = el.tags || {};
     bars.push({
+      id: el.type + el.id,
       name: tags.name || 'A mystery bar (no name on the map)',
-      lat: el.lat, lon: el.lon,
+      lat: p.lat, lon: p.lon,
       sporty: !!tags.sport || SPORTY_NAME.test(tags.name || ''),
-      dist: haversine(lat, lon, el.lat, el.lon),
+      dist: haversine(lat, lon, p.lat, p.lon),
     });
   }
   bars.sort((a, b) => a.dist - b.dist);
@@ -440,62 +617,174 @@ function pickStartIndex(bars) {
   const i = bars.findIndex(b => b.sporty);
   return i >= 0 ? i : 0; // nearest sporty one, else plain nearest
 }
-
-/* ---------- arrow rendering ---------- */
-const arrowEl = document.getElementById('arrow');
-const wrapEl = document.getElementById('compass-wrap');
-let displayedRotation = 0;
-let rafPending = false;
-let wasLocked = false;
-
-function requestArrowUpdate() {
-  if (rafPending) return;
-  rafPending = true;
-  requestAnimationFrame(() => { rafPending = false; updateArrow(); });
+/* re-fetch in the background once the user has walked far enough */
+async function maybeRefetchBars() {
+  if (refetching || !userPos || !lastFetchPos) return;
+  if (haversine(userPos.lat, userPos.lon, lastFetchPos.lat, lastFetchPos.lon) < 400) return;
+  refetching = true;
+  try {
+    const elements = await fetchBars(userPos.lat, userPos.lon);
+    const fresh = buildBarList(elements, userPos.lat, userPos.lon);
+    if (fresh.length) {
+      const currentId = barList[barIndex] && barList[barIndex].id;
+      barList = fresh;
+      const keep = barList.findIndex(b => b.id === currentId);
+      barIndex = keep >= 0 ? keep : pickStartIndex(barList);
+      lastFetchPos = { lat: userPos.lat, lon: userPos.lon };
+      renderBar();
+    }
+  } catch (e) { /* background refresh only — ignore */ }
+  refetching = false;
 }
-function updateArrow() {
-  if (compassHeading == null || !userPos || !barList[barIndex]) return;
+
+/* ---------- arrow rendering: continuous easing loop ---------- */
+const arrowEl = document.getElementById('arrow');
+const roseEl = document.getElementById('rose');
+const wrapEl = document.getElementById('compass-wrap');
+let displayedRotation = 0;   // arrow, unwrapped degrees
+let targetRotation = 0;
+let displayedRose = 0;       // rose, unwrapped degrees
+let targetRose = 0;
+let animRunning = false;
+let wasLocked = false;
+let arrived = false;
+
+function unwrapToward(current, desired) {
+  // shortest-path target so the needle never whips the long way round 0/360
+  const cur = ((current % 360) + 360) % 360;
+  return current + (((desired - cur + 540) % 360) - 180);
+}
+function animate() {
+  if (!animRunning) return;
   const bar = barList[barIndex];
-  const bearing = bearingTo(userPos.lat, userPos.lon, bar.lat, bar.lon);
-  const target = (bearing - compassHeading + 360) % 360;
-  // shortest-path rotation so the needle never whips the long way round 0/360
-  const delta = ((target - (displayedRotation % 360 + 360) % 360 + 540) % 360) - 180;
-  displayedRotation += delta;
+  if (bar && userPos && compassHeading != null) {
+    const bearing = bearingTo(userPos.lat, userPos.lon, bar.lat, bar.lon);
+    targetRotation = unwrapToward(targetRotation, (bearing - compassHeading + 360) % 360);
+    targetRose = unwrapToward(targetRose, (360 - compassHeading) % 360);
+  }
+  displayedRotation += (targetRotation - displayedRotation) * 0.15;
+  displayedRose += (targetRose - displayedRose) * 0.15;
   arrowEl.style.transform = 'rotate(' + displayedRotation + 'deg)';
-  const off = Math.min(target, 360 - target);
-  const locked = off < 10;
+  roseEl.style.transform = 'rotate(' + displayedRose + 'deg)';
+  // lock-on: needle settled and pointing at the bar
+  const t = ((targetRotation % 360) + 360) % 360;
+  const off = Math.min(t, 360 - t);
+  const locked = off < 10 && Math.abs(targetRotation - displayedRotation) < 6;
   wrapEl.classList.toggle('locked', locked);
   if (locked && !wasLocked && navigator.vibrate) navigator.vibrate(40);
   wasLocked = locked;
+  requestAnimationFrame(animate);
+}
+function startAnimation() {
+  if (animRunning) return;
+  animRunning = true;
+  requestAnimationFrame(animate);
 }
 
 function renderBar() {
   const bar = barList[barIndex];
+  if (!bar) return;
   document.getElementById('bar-name').textContent = bar.name;
   document.getElementById('bar-distance').textContent =
     formatDistance(bar.dist) + ' · ' + walkEta(bar.dist);
-  const hints = [
-    'Follow the arrow. Trust the arrow.',
-    'The arrow has never missed.* (*citation needed)',
-    'Walk with purpose. You’re on in five.',
-    'If you hit water, that was the wrong arrow.',
-  ];
-  document.getElementById('bar-hint').textContent =
-    hints[Math.floor(bar.dist) % hints.length];
-  requestArrowUpdate();
+  if (!motionGranted || !headingEverReceived) compassFallbackHint();
 }
 
-/* ---------- no-compass fallback ---------- */
-function compassFallback() {
-  // No absolute heading available: keep the bar info, replace spin with a static cardinal hint
+/* rotating matchday microcopy */
+let hintTimer = null;
+function startHints() {
+  let i = 0;
+  const el = document.getElementById('bar-hint');
+  clearInterval(hintTimer);
+  hintTimer = setInterval(() => {
+    if (!motionGranted || !headingEverReceived) return; // fallback hint owns the line
+    i = (i + 1) % COMPASS_HINTS.length;
+    el.textContent = COMPASS_HINTS[i];
+  }, 6000);
+}
+
+/* ---------- no-compass fallback: map-direction mode ---------- */
+function compassFallbackHint() {
   const bar = barList[barIndex];
-  if (!bar || !userPos) { showError('network'); return; }
+  if (!bar || !userPos) return;
   const bearing = bearingTo(userPos.lat, userPos.lon, bar.lat, bar.lon);
+  targetRotation = displayedRotation = bearing;
+  targetRose = displayedRose = 0;
   arrowEl.style.transform = 'rotate(' + bearing + 'deg)';
-  displayedRotation = bearing;
-  document.getElementById('bar-hint').textContent =
-    'Your phone won’t share its compass, so the needle can’t spin. Head ' +
-    cardinal(bearing) + ' — the arrow shows map direction (top of screen = north).';
+  roseEl.style.transform = 'rotate(0deg)';
+  const maps = 'https://www.google.com/maps/dir/?api=1&destination=' +
+               bar.lat + ',' + bar.lon + '&travelmode=walking';
+  document.getElementById('bar-hint').innerHTML =
+    'Your phone’s compass isn’t playing today — the arrow shows map direction (top of screen = north). Head ' +
+    cardinal(bearing) + ', or <a class="maps-link" href="' + maps + '" target="_blank" rel="noopener">open in Maps</a>.';
+}
+
+/* ---------- GOAL: arrival + share ---------- */
+const ARRIVAL_M = 40;
+function checkArrival() {
+  const bar = barList[barIndex];
+  if (!bar || arrived || bar.dist > ARRIVAL_M) return;
+  arrived = true;
+  show('goal');
+  burstConfetti();
+}
+function burstConfetti() {
+  const colors = ['#E8530E', '#2D6CA2', '#E0A82E', '#2E5E3A'];
+  for (let i = 0; i < 44; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = (Math.random() * 100) + 'vw';
+    c.style.background = colors[i % 4];
+    c.style.animationDuration = (1.6 + Math.random() * 1.8) + 's';
+    c.style.animationDelay = (Math.random() * 0.6) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4500);
+  }
+}
+async function shareFind() {
+  const bar = barList[barIndex];
+  const distText = formatDistance(startDist != null ? startDist : (bar ? bar.dist : 0));
+  const text = APP_NAME + ' guided me ' + distText + ' to ' + (bar ? bar.name : 'the match') +
+               '. Made with ' + BRAND_NAME + '. ' + location.href;
+  // draw a programme-style share card on canvas
+  try {
+    await document.fonts.ready;
+    const cv = document.createElement('canvas');
+    cv.width = 1080; cv.height = 1080;
+    const x = cv.getContext('2d');
+    x.fillStyle = '#F2E8CF'; x.fillRect(0, 0, 1080, 1080);
+    x.fillStyle = 'rgba(28,27,25,.06)';
+    for (let i = 0; i < 1080; i += 18)
+      for (let j = 0; j < 1080; j += 18) { x.beginPath(); x.arc(i, j, 2, 0, 7); x.fill(); }
+    x.strokeStyle = '#1C1B19'; x.lineWidth = 6; x.strokeRect(40, 40, 1000, 1000);
+    x.textAlign = 'center';
+    x.fillStyle = '#E0A82E';
+    x.font = '400 300px Anton, sans-serif'; x.fillText('GOAL.', 548, 478);
+    x.fillStyle = '#E8530E';
+    x.font = '400 300px Anton, sans-serif'; x.fillText('GOAL.', 540, 470);
+    x.fillStyle = '#1C1B19';
+    x.font = '700 44px "Space Mono", monospace';
+    x.fillText(APP_NAME.toUpperCase() + ' GUIDED ME ' + distText.toUpperCase(), 540, 610);
+    x.font = '400 64px Anton, sans-serif';
+    const name = bar ? bar.name.toUpperCase() : 'TO THE MATCH';
+    x.fillText('TO ' + (name.length > 22 ? name.slice(0, 21) + '…' : name), 540, 710);
+    x.font = '400 36px "Space Mono", monospace';
+    x.fillStyle = '#E8530E';
+    x.fillText('MADE WITH ' + BRAND_NAME.toUpperCase(), 540, 880);
+    x.fillStyle = '#2D6CA2';
+    x.fillText(location.host + location.pathname, 540, 940);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const file = new File([blob], 'goal-compass.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text });
+      return;
+    }
+  } catch (e) { /* canvas/share failed — fall through to text */ }
+  try { await navigator.share({ text }); }
+  catch (e) {
+    try { await navigator.clipboard.writeText(text); alert('Copied to clipboard — paste it anywhere.'); }
+    catch (e2) { /* user cancelled */ }
+  }
 }
 
 /* ---------- loading line rotation ---------- */
@@ -504,6 +793,7 @@ function startLoadingLines() {
   let i = 0;
   const el = document.getElementById('loading-line');
   el.textContent = LOADING_LINES[0];
+  clearInterval(loadingTimer);
   loadingTimer = setInterval(() => {
     i = (i + 1) % LOADING_LINES.length;
     el.textContent = LOADING_LINES[i];
@@ -512,68 +802,101 @@ function startLoadingLines() {
 function stopLoadingLines() { clearInterval(loadingTimer); }
 
 /* ---------- main flow ---------- */
+let watchdog = null;
+let startDist = null; // distance when the journey began, for the share card
+
 async function start() {
-  // 1. Motion permission — must happen inside the tap gesture (iOS)
-  const motionOk = await startCompass();
-  if (!motionOk) { showError('motionDenied'); return; }
+  document.getElementById('prime').classList.remove('active');
+
+  // 1. Motion permission — must happen inside the tap gesture (iOS).
+  //    Denied ≠ dead end: we degrade to map-direction mode.
+  motionGranted = await startCompass();
 
   show('loading');
   startLoadingLines();
+  // never strand the user on the spinner
+  clearTimeout(watchdog);
+  watchdog = setTimeout(() => { showError('network'); }, 30000);
 
   // 2. Location
   let pos;
   try {
     pos = await getPosition();
   } catch (err) {
-    stopLoadingLines();
     showError(err && err.code === 1 ? 'locationDenied' : 'locationFailed');
     return;
   }
   userPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+  lastFetchPos = { lat: userPos.lat, lon: userPos.lon };
 
   // 3. Bars
   let elements;
   try {
     elements = await fetchBars(userPos.lat, userPos.lon);
   } catch (err) {
-    stopLoadingLines();
     showError('network');
     return;
   }
+  clearTimeout(watchdog);
   stopLoadingLines();
 
   barList = buildBarList(elements, userPos.lat, userPos.lon);
   if (!barList.length) { showError('noBars'); return; }
   barIndex = pickStartIndex(barList);
+  startDist = barList[barIndex].dist;
+  arrived = false;
 
   show('compass');
   renderBar();
+  startHints();
+  startAnimation();
 
-  // 4. If no heading arrives shortly, fall back to map-direction mode
-  setTimeout(() => { if (!headingEverReceived) compassFallback(); }, 4000);
+  // 4. If motion was granted but no usable heading ever arrives, degrade too
+  setTimeout(() => { if (!headingEverReceived) compassFallbackHint(); }, 4000);
 
-  // 5. Keep distance fresh as they walk
-  navigator.geolocation.watchPosition(p => {
-    userPos = { lat: p.coords.latitude, lon: p.coords.longitude };
-    if (barList[barIndex]) {
-      barList.forEach(b => { b.dist = haversine(userPos.lat, userPos.lon, b.lat, b.lon); });
-      document.getElementById('bar-distance').textContent =
-        formatDistance(barList[barIndex].dist) + ' · ' + walkEta(barList[barIndex].dist);
-      requestArrowUpdate();
-    }
-  }, () => {}, { enableHighAccuracy: true, maximumAge: 5000 });
+  // 5. Keep position fresh as they walk
+  navigator.geolocation.watchPosition(onPositionUpdate, () => {},
+    { enableHighAccuracy: true, maximumAge: 3000 });
 }
 
+function onPositionUpdate(p) {
+  userPos = { lat: p.coords.latitude, lon: p.coords.longitude };
+  if (!barList.length) return;
+  barList.forEach(b => { b.dist = haversine(userPos.lat, userPos.lon, b.lat, b.lon); });
+  const bar = barList[barIndex];
+  document.getElementById('bar-distance').textContent =
+    formatDistance(bar.dist) + ' · ' + walkEta(bar.dist);
+  if (!motionGranted || !headingEverReceived) compassFallbackHint();
+  checkArrival();
+  maybeRefetchBars();
+}
+
+/* coming back to the tab → force a fresh fix so the arrow recalibrates */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && userPos) {
+    navigator.geolocation.getCurrentPosition(onPositionUpdate, () => {},
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+  }
+});
+/* Safari bfcache restore → reset to a clean landing */
+window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
+
 /* ---------- wire up ---------- */
-document.getElementById('btn-start').addEventListener('click', start);
+document.getElementById('btn-start').addEventListener('click', () => {
+  document.getElementById('prime').classList.add('active');
+});
+document.getElementById('btn-kickoff').addEventListener('click', start);
 document.getElementById('btn-retry').addEventListener('click', () => location.reload());
+document.getElementById('btn-recal').addEventListener('click', () => location.reload());
 document.getElementById('btn-next').addEventListener('click', () => {
   if (!barList.length) return;
   barIndex = (barIndex + 1) % barList.length;
+  arrived = false;
+  startDist = barList[barIndex].dist;
   renderBar();
-  if (!headingEverReceived) compassFallback();
 });
-document.getElementById('btn-recal').addEventListener('click', () => location.reload());
+document.getElementById('btn-share').addEventListener('click', shareFind);
+document.getElementById('btn-back').addEventListener('click', () => { arrived = true; show('compass'); });
 </script>
 </body>
 </html>
