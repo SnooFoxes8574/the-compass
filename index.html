@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>The Compass — find the nearest match. By Madison.</title>
+<meta name="description" content="A compass that points you to the nearest sports bar showing the match. By Madison.">
+<meta property="og:title" content="The Compass — find the nearest match. By Madison.">
+<meta property="og:description" content="Open on your phone, grant location, follow the arrow. It points at the nearest sports bar showing the match.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Compass — find the nearest match. By Madison.">
+<meta name="twitter:description" content="Open on your phone, grant location, follow the arrow.">
+<style>
+/* ============================================================
+   BRAND THEME — swap these to restyle the whole thing.
+   ============================================================ */
+:root {
+  --brand-color: #2fd566;          /* pitch green */
+  --bg: #08130c;                   /* floodlit night */
+  --text: #f3fff6;                 /* chalk white */
+  --accent: #ffd84d;               /* referee-card yellow */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* stadium floodlight glow */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(47,213,102,.22), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 50% 115%, rgba(47,213,102,.10), transparent 60%);
+  pointer-events: none;
+}
+
+.screen {
+  position: fixed; inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 28px calc(64px + env(safe-area-inset-bottom));
+  gap: 18px;
+}
+.screen.active { display: flex; }
+
+.kicker {
+  font-size: 12px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--brand-color);
+  font-weight: 700;
+}
+h1 { font-size: clamp(34px, 9vw, 52px); font-weight: 800; line-height: 1.05; letter-spacing: -.02em; }
+.pitch-line { font-size: 17px; line-height: 1.5; color: var(--text); opacity: .82; max-width: 30ch; }
+
+.btn {
+  appearance: none; border: none; cursor: pointer;
+  font-family: var(--font);
+  font-size: 19px; font-weight: 800;
+  color: var(--bg);
+  background: var(--brand-color);
+  padding: 18px 40px;
+  border-radius: 999px;
+  margin-top: 10px;
+  box-shadow: 0 0 36px rgba(47,213,102,.45);
+  transition: transform .12s ease;
+}
+.btn:active { transform: scale(.96); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+  border: 1.5px solid rgba(243,255,246,.3);
+  font-size: 14px; font-weight: 600;
+  padding: 10px 20px;
+  margin-top: 0;
+}
+
+/* ---------- compass screen ---------- */
+#screen-compass { justify-content: space-between; padding-top: max(28px, env(safe-area-inset-top)); }
+.compass-top { display: flex; flex-direction: column; gap: 4px; }
+.compass-wrap {
+  position: relative;
+  width: min(78vw, 46vh);
+  aspect-ratio: 1;
+}
+/* centre-circle dial, chalk on grass */
+.dial {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(243,255,246,.85);
+  box-shadow:
+    inset 0 0 0 10px rgba(243,255,246,.05),
+    0 0 60px rgba(47,213,102,.18);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(47,213,102,.14), rgba(47,213,102,.03) 70%);
+}
+.dial .tick {
+  position: absolute; top: 8px; left: 50%;
+  width: 2px; height: 10px;
+  background: rgba(243,255,246,.5);
+  transform-origin: 50% calc(min(78vw, 46vh)/2 - 8px);
+}
+/* penalty spot */
+.dial::after {
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: rgba(243,255,246,.9);
+  transform: translate(-50%, -50%);
+}
+#arrow {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .25s ease-out;
+  will-change: transform;
+}
+#arrow svg { width: 62%; height: 62%; overflow: visible; }
+.compass-wrap.locked .dial { animation: lockpulse 1.2s ease-in-out infinite; }
+@keyframes lockpulse {
+  0%, 100% { box-shadow: inset 0 0 0 10px rgba(243,255,246,.05), 0 0 60px rgba(47,213,102,.18); }
+  50%      { box-shadow: inset 0 0 0 10px rgba(243,255,246,.05), 0 0 90px rgba(47,213,102,.55); }
+}
+.bar-info { display: flex; flex-direction: column; gap: 6px; }
+#bar-name { font-size: clamp(22px, 6.5vw, 30px); font-weight: 800; line-height: 1.15; }
+#bar-distance { font-size: 16px; color: var(--accent); font-weight: 700; }
+#bar-hint { font-size: 13px; opacity: .6; }
+.compass-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* ---------- loading ---------- */
+.ball {
+  width: 54px; height: 54px;
+  animation: bounce 0.9s cubic-bezier(.5,0,.7,1) infinite alternate;
+}
+@keyframes bounce { from { transform: translateY(-18px); } to { transform: translateY(14px) ; } }
+#loading-line { min-height: 3em; }
+
+/* ---------- desktop ---------- */
+#qr-box {
+  background: #fff;
+  padding: 14px;
+  border-radius: 16px;
+  line-height: 0;
+  box-shadow: 0 0 50px rgba(47,213,102,.3);
+}
+#qr-box img { width: 200px; height: 200px; }
+.url-chip {
+  font-size: 14px;
+  color: var(--accent);
+  border: 1px dashed rgba(255,216,77,.5);
+  padding: 8px 16px;
+  border-radius: 999px;
+  word-break: break-all;
+}
+
+/* ---------- error ---------- */
+.error-emoji { font-size: 56px; line-height: 1; }
+
+/* ---------- Madison credit, on every screen ---------- */
+#credit {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: .12em;
+  z-index: 10;
+}
+#credit a { color: var(--text); opacity: .55; text-decoration: none; }
+#credit a strong { color: var(--brand-color); font-weight: 800; }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<section class="screen active" id="screen-landing">
+  <div class="kicker" data-brand-kicker>The Compass</div>
+  <h1>Every match has a home.<br>Find yours.</h1>
+  <p class="pitch-line">A compass that points at the nearest sports bar. Grant location &amp; motion, then follow the arrow.</p>
+  <button class="btn" id="btn-start">Find the match</button>
+  <p class="pitch-line" style="font-size:13px;opacity:.5;">No login. No app. No offside trap.</p>
+</section>
+
+<!-- LOADING -->
+<section class="screen" id="screen-loading">
+  <svg class="ball" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="46" fill="var(--text)"/>
+    <path d="M50 28 L70 42 L62 66 L38 66 L30 42 Z" fill="var(--bg)"/>
+    <path d="M50 4 L50 28 M70 42 L93 35 M62 66 L76 88 M38 66 L24 88 M30 42 L7 35" stroke="var(--bg)" stroke-width="5" fill="none"/>
+  </svg>
+  <p class="pitch-line" id="loading-line">Locating the nearest match…</p>
+</section>
+
+<!-- COMPASS -->
+<section class="screen" id="screen-compass">
+  <div class="compass-top">
+    <div class="kicker" data-brand-kicker>The Compass</div>
+  </div>
+  <div class="compass-wrap" id="compass-wrap">
+    <div class="dial" id="dial"></div>
+    <div id="arrow">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <!-- corner-flag compass needle -->
+        <polygon points="50,-6 64,52 50,42 36,52" fill="var(--brand-color)" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>
+        <polygon points="50,42 60,50 50,94 40,50" fill="rgba(243,255,246,.25)"/>
+        <line x1="50" y1="42" x2="50" y2="94" stroke="rgba(243,255,246,.5)" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+  <div class="bar-info">
+    <div id="bar-name">…</div>
+    <div id="bar-distance">…</div>
+    <div id="bar-hint">Follow the arrow. Trust the arrow.</div>
+  </div>
+  <div class="compass-controls">
+    <button class="btn btn-ghost" id="btn-next">Next bar →</button>
+    <button class="btn btn-ghost" id="btn-recal">Recalibrate</button>
+  </div>
+</section>
+
+<!-- ERROR -->
+<section class="screen" id="screen-error">
+  <div class="error-emoji" id="error-emoji">🟥</div>
+  <h1 id="error-title" style="font-size:clamp(24px,7vw,34px);">Red card.</h1>
+  <p class="pitch-line" id="error-msg"></p>
+  <button class="btn" id="btn-retry">Try again</button>
+</section>
+
+<!-- DESKTOP -->
+<section class="screen" id="screen-desktop">
+  <div class="kicker" data-brand-kicker>The Compass</div>
+  <h1>This one's for<br>your pocket.</h1>
+  <p class="pitch-line">The Compass points your phone at the nearest sports bar showing the match. Laptops don't have compasses — scan to play.</p>
+  <div id="qr-box"></div>
+  <div class="url-chip" id="url-chip"></div>
+</section>
+
+<!-- Madison credit (persistent) -->
+<div id="credit"><a href="https://www.madewithmadison.com" target="_blank" rel="noopener">by <strong id="credit-name">Madison</strong></a></div>
+
+<script>
+'use strict';
+/* ============================================================
+   BRAND — swap in one place.
+   ============================================================ */
+const BRAND_NAME = 'Madison';
+
+document.getElementById('credit-name').textContent = BRAND_NAME;
+
+/* ---------- tiny screen router ---------- */
+const screens = ['landing','loading','compass','error','desktop'];
+function show(name) {
+  screens.forEach(s => document.getElementById('screen-' + s).classList.toggle('active', s === name));
+}
+
+/* ---------- copy deck ---------- */
+const LOADING_LINES = [
+  'Locating the nearest match…',
+  'VAR is checking your location…',
+  'Finding your people…',
+  'Warming up the subs…',
+  'Asking the fourth official…',
+];
+const ERRORS = {
+  locationDenied: { emoji: '🟥', title: 'No location, no match.', msg: 'The Compass can’t point you anywhere without your location. Allow location access in your browser settings, then try again.' },
+  locationFailed: { emoji: '📡', title: 'GPS is having an off day.', msg: 'We couldn’t pin you down. Step near a window (or out of the tunnel) and try again.' },
+  motionDenied:   { emoji: '🧭', title: 'The arrow needs your compass.', msg: 'Motion & orientation access was declined, so the needle can’t spin. Reload and tap Allow this time — we believe in you.' },
+  noBars:         { emoji: '🏟️', title: 'Away game, sorry.', msg: 'No bars or pubs within 2 km. Either you’re very remote or very disciplined. Move closer to civilisation and try again.' },
+  network:        { emoji: '📋', title: 'The scouts didn’t report back.', msg: 'We couldn’t reach the bar database. Probably a network hiccup — give it another go.' },
+};
+function showError(key) {
+  const e = ERRORS[key] || ERRORS.network;
+  document.getElementById('error-emoji').textContent = e.emoji;
+  document.getElementById('error-title').textContent = e.title;
+  document.getElementById('error-msg').textContent = e.msg;
+  show('error');
+}
+
+/* ---------- desktop gate ---------- */
+const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || isIPadOS;
+if (!isMobile) {
+  const url = location.href;
+  document.getElementById('url-chip').textContent = url.replace(/^https?:\/\//, '');
+  const img = new Image();
+  img.alt = 'QR code to open The Compass on your phone';
+  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&qzone=1&color=08130c&data=' + encodeURIComponent(url);
+  document.getElementById('qr-box').appendChild(img);
+  show('desktop');
+}
+
+/* ---------- geometry ---------- */
+const toRad = d => d * Math.PI / 180;
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+function bearingTo(lat1, lon1, lat2, lon2) {
+  const f1 = toRad(lat1), f2 = toRad(lat2), dL = toRad(lon2 - lon1);
+  const th = Math.atan2(
+    Math.sin(dL) * Math.cos(f2),
+    Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dL)
+  );
+  return (th * 180 / Math.PI + 360) % 360;
+}
+function formatDistance(m) {
+  return m < 1000 ? Math.round(m) + ' m away' : (m / 1000).toFixed(1) + ' km away';
+}
+function walkEta(m) {
+  const min = Math.max(1, Math.round(m / 80)); // ~4.8 km/h
+  return '~' + min + ' min walk';
+}
+function cardinal(deg) {
+  const dirs = ['north','north-east','east','south-east','south','south-west','west','north-west'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+/* ---------- compass heading ---------- */
+let compassHeading = null;     // 0-360, degrees clockwise from north
+let headingEverReceived = false;
+
+function getCompassHeading(e) {
+  // iOS: degrees clockwise from true north, only exists on iOS
+  if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
+    return e.webkitCompassHeading;
+  }
+  if (e.alpha == null) return null;
+  // Only trust absolute readings — relative alpha would spin randomly
+  if (!e.absolute && e.type !== 'deviceorientationabsolute') return null;
+  const screenAngle = (screen.orientation && typeof screen.orientation.angle === 'number')
+    ? screen.orientation.angle
+    : (typeof window.orientation === 'number' ? window.orientation : 0);
+  return (360 - e.alpha + screenAngle + 360) % 360;
+}
+
+function onOrientation(e) {
+  const h = getCompassHeading(e);
+  if (h == null) return;
+  headingEverReceived = true;
+  compassHeading = h;
+  requestArrowUpdate();
+}
+
+async function startCompass() {
+  // iOS 13+ requires an explicit permission call from inside a user gesture
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    let state;
+    try { state = await DeviceOrientationEvent.requestPermission(); }
+    catch (err) { state = 'denied'; }
+    if (state !== 'granted') return false;
+    window.addEventListener('deviceorientation', onOrientation, true);
+  } else {
+    // Android: absolute event preferred; some devices flag absolute on the base event
+    window.addEventListener('deviceorientationabsolute', onOrientation, true);
+    window.addEventListener('deviceorientation', onOrientation, true);
+  }
+  return true;
+}
+
+/* ---------- location ---------- */
+function getPosition() {
+  return new Promise((resolve, reject) => {
+    if (!('geolocation' in navigator)) { reject({ code: 2 }); return; }
+    navigator.geolocation.getCurrentPosition(resolve, reject,
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+  });
+}
+
+/* ---------- Overpass ---------- */
+async function fetchBars(lat, lon) {
+  const q = `[out:json][timeout:25];
+(
+  node["amenity"="bar"]["sport"](around:2000,${lat},${lon});
+  node["amenity"="pub"]["sport"](around:2000,${lat},${lon});
+  node["amenity"="bar"](around:2000,${lat},${lon});
+  node["amenity"="pub"](around:2000,${lat},${lon});
+);
+out body;`;
+  const endpoints = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+  ];
+  let lastErr;
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(q),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      return json.elements || [];
+    } catch (err) { lastErr = err; }
+  }
+  throw lastErr || new Error('overpass failed');
+}
+
+/* ---------- bar selection ---------- */
+const SPORTY_NAME = /sport|stadium|fan|kick|goal|league|club house|tavern/i;
+let userPos = null;     // {lat, lon}
+let barList = [];       // sorted by distance
+let barIndex = 0;
+
+function buildBarList(elements, lat, lon) {
+  const seen = new Set();
+  const bars = [];
+  for (const el of elements) {
+    if (el.type !== 'node' || seen.has(el.id)) continue;
+    seen.add(el.id);
+    const tags = el.tags || {};
+    bars.push({
+      name: tags.name || 'A mystery bar (no name on the map)',
+      lat: el.lat, lon: el.lon,
+      sporty: !!tags.sport || SPORTY_NAME.test(tags.name || ''),
+      dist: haversine(lat, lon, el.lat, el.lon),
+    });
+  }
+  bars.sort((a, b) => a.dist - b.dist);
+  return bars;
+}
+function pickStartIndex(bars) {
+  const i = bars.findIndex(b => b.sporty);
+  return i >= 0 ? i : 0; // nearest sporty one, else plain nearest
+}
+
+/* ---------- arrow rendering ---------- */
+const arrowEl = document.getElementById('arrow');
+const wrapEl = document.getElementById('compass-wrap');
+let displayedRotation = 0;
+let rafPending = false;
+let wasLocked = false;
+
+function requestArrowUpdate() {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => { rafPending = false; updateArrow(); });
+}
+function updateArrow() {
+  if (compassHeading == null || !userPos || !barList[barIndex]) return;
+  const bar = barList[barIndex];
+  const bearing = bearingTo(userPos.lat, userPos.lon, bar.lat, bar.lon);
+  const target = (bearing - compassHeading + 360) % 360;
+  // shortest-path rotation so the needle never whips the long way round 0/360
+  const delta = ((target - (displayedRotation % 360 + 360) % 360 + 540) % 360) - 180;
+  displayedRotation += delta;
+  arrowEl.style.transform = 'rotate(' + displayedRotation + 'deg)';
+  const off = Math.min(target, 360 - target);
+  const locked = off < 10;
+  wrapEl.classList.toggle('locked', locked);
+  if (locked && !wasLocked && navigator.vibrate) navigator.vibrate(40);
+  wasLocked = locked;
+}
+
+function renderBar() {
+  const bar = barList[barIndex];
+  document.getElementById('bar-name').textContent = bar.name;
+  document.getElementById('bar-distance').textContent =
+    formatDistance(bar.dist) + ' · ' + walkEta(bar.dist);
+  const hints = [
+    'Follow the arrow. Trust the arrow.',
+    'The arrow has never missed.* (*citation needed)',
+    'Walk with purpose. You’re on in five.',
+    'If you hit water, that was the wrong arrow.',
+  ];
+  document.getElementById('bar-hint').textContent =
+    hints[Math.floor(bar.dist) % hints.length];
+  requestArrowUpdate();
+}
+
+/* ---------- no-compass fallback ---------- */
+function compassFallback() {
+  // No absolute heading available: keep the bar info, replace spin with a static cardinal hint
+  const bar = barList[barIndex];
+  if (!bar || !userPos) { showError('network'); return; }
+  const bearing = bearingTo(userPos.lat, userPos.lon, bar.lat, bar.lon);
+  arrowEl.style.transform = 'rotate(' + bearing + 'deg)';
+  displayedRotation = bearing;
+  document.getElementById('bar-hint').textContent =
+    'Your phone won’t share its compass, so the needle can’t spin. Head ' +
+    cardinal(bearing) + ' — the arrow shows map direction (top of screen = north).';
+}
+
+/* ---------- loading line rotation ---------- */
+let loadingTimer = null;
+function startLoadingLines() {
+  let i = 0;
+  const el = document.getElementById('loading-line');
+  el.textContent = LOADING_LINES[0];
+  loadingTimer = setInterval(() => {
+    i = (i + 1) % LOADING_LINES.length;
+    el.textContent = LOADING_LINES[i];
+  }, 1800);
+}
+function stopLoadingLines() { clearInterval(loadingTimer); }
+
+/* ---------- main flow ---------- */
+async function start() {
+  // 1. Motion permission — must happen inside the tap gesture (iOS)
+  const motionOk = await startCompass();
+  if (!motionOk) { showError('motionDenied'); return; }
+
+  show('loading');
+  startLoadingLines();
+
+  // 2. Location
+  let pos;
+  try {
+    pos = await getPosition();
+  } catch (err) {
+    stopLoadingLines();
+    showError(err && err.code === 1 ? 'locationDenied' : 'locationFailed');
+    return;
+  }
+  userPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+
+  // 3. Bars
+  let elements;
+  try {
+    elements = await fetchBars(userPos.lat, userPos.lon);
+  } catch (err) {
+    stopLoadingLines();
+    showError('network');
+    return;
+  }
+  stopLoadingLines();
+
+  barList = buildBarList(elements, userPos.lat, userPos.lon);
+  if (!barList.length) { showError('noBars'); return; }
+  barIndex = pickStartIndex(barList);
+
+  show('compass');
+  renderBar();
+
+  // 4. If no heading arrives shortly, fall back to map-direction mode
+  setTimeout(() => { if (!headingEverReceived) compassFallback(); }, 4000);
+
+  // 5. Keep distance fresh as they walk
+  navigator.geolocation.watchPosition(p => {
+    userPos = { lat: p.coords.latitude, lon: p.coords.longitude };
+    if (barList[barIndex]) {
+      barList.forEach(b => { b.dist = haversine(userPos.lat, userPos.lon, b.lat, b.lon); });
+      document.getElementById('bar-distance').textContent =
+        formatDistance(barList[barIndex].dist) + ' · ' + walkEta(barList[barIndex].dist);
+      requestArrowUpdate();
+    }
+  }, () => {}, { enableHighAccuracy: true, maximumAge: 5000 });
+}
+
+/* ---------- wire up ---------- */
+document.getElementById('btn-start').addEventListener('click', start);
+document.getElementById('btn-retry').addEventListener('click', () => location.reload());
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (!barList.length) return;
+  barIndex = (barIndex + 1) % barList.length;
+  renderBar();
+  if (!headingEverReceived) compassFallback();
+});
+document.getElementById('btn-recal').addEventListener('click', () => location.reload());
+</script>
+</body>
+</html>
