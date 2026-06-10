@@ -163,10 +163,9 @@ h1 {
     var(--card);
   box-shadow: 4px 4px 0 rgba(28,27,25,.15), inset 0 0 0 8px var(--card), inset 0 0 0 9.5px rgba(28,27,25,.35);
 }
-/* rotating compass rose (counter-rotates with heading, like a real compass) */
+/* compass rose — static printed dial marks */
 #rose {
   position: absolute; inset: 0;
-  will-change: transform;
 }
 #rose span {
   position: absolute;
@@ -189,6 +188,27 @@ h1 {
 .compass-wrap.locked .dial { border-color: var(--accent); }
 .compass-wrap.locked #arrow { animation: lockbob 1s ease-in-out infinite; }
 @keyframes lockbob { 0%,100% { scale: 1; } 50% { scale: 1.04; } }
+
+/* match ticker — programme listing under the wordmark */
+#ticker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 92vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1.5px solid rgba(28,27,25,.25);
+  border-bottom: 1.5px solid rgba(28,27,25,.25);
+  padding: 6px 14px;
+  margin-top: 8px;
+}
+#ticker .live-dot {
+  color: var(--accent);
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+#ticker .tk-label { color: var(--accent-2); font-weight: 700; }
 
 .bar-block { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 #bar-name {
@@ -313,8 +333,11 @@ h1 {
 
 <!-- MAIN COMPASS — The Bearing -->
 <section class="screen" id="screen-compass">
-  <div class="wordmark">GOAL COMPASS
-    <svg class="mini-ball" viewBox="0 0 100 100"><use href="#telstar-src"/></svg>
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="wordmark">GOAL COMPASS
+      <svg class="mini-ball" viewBox="0 0 100 100"><use href="#telstar-src"/></svg>
+    </div>
+    <div id="ticker"></div>
   </div>
   <div class="compass-wrap" id="compass-wrap">
     <div class="dial"></div>
@@ -639,12 +662,9 @@ async function maybeRefetchBars() {
 
 /* ---------- arrow rendering: continuous easing loop ---------- */
 const arrowEl = document.getElementById('arrow');
-const roseEl = document.getElementById('rose');
 const wrapEl = document.getElementById('compass-wrap');
 let displayedRotation = 0;   // arrow, unwrapped degrees
 let targetRotation = 0;
-let displayedRose = 0;       // rose, unwrapped degrees
-let targetRose = 0;
 let animRunning = false;
 let wasLocked = false;
 let arrived = false;
@@ -660,12 +680,9 @@ function animate() {
   if (bar && userPos && compassHeading != null) {
     const bearing = bearingTo(userPos.lat, userPos.lon, bar.lat, bar.lon);
     targetRotation = unwrapToward(targetRotation, (bearing - compassHeading + 360) % 360);
-    targetRose = unwrapToward(targetRose, (360 - compassHeading) % 360);
   }
   displayedRotation += (targetRotation - displayedRotation) * 0.15;
-  displayedRose += (targetRose - displayedRose) * 0.15;
   arrowEl.style.transform = 'rotate(' + displayedRotation + 'deg)';
-  roseEl.style.transform = 'rotate(' + displayedRose + 'deg)';
   // lock-on: needle settled and pointing at the bar
   const t = ((targetRotation % 360) + 360) % 360;
   const off = Math.min(t, 360 - t);
@@ -709,9 +726,7 @@ function compassFallbackHint() {
   if (!bar || !userPos) return;
   const bearing = bearingTo(userPos.lat, userPos.lon, bar.lat, bar.lon);
   targetRotation = displayedRotation = bearing;
-  targetRose = displayedRose = 0;
   arrowEl.style.transform = 'rotate(' + bearing + 'deg)';
-  roseEl.style.transform = 'rotate(0deg)';
   const maps = 'https://www.google.com/maps/dir/?api=1&destination=' +
                bar.lat + ',' + bar.lon + '&travelmode=walking';
   document.getElementById('bar-hint').innerHTML =
@@ -787,6 +802,52 @@ async function shareFind() {
   }
 }
 
+/* ---------- match ticker: schedule-based, no live data ---------- */
+const WC_FIXTURES = [[1781204400,"Mexico","South Africa"],[1781229600,"Korea Republic","Czechia"],[1781290800,"Canada","Bosnia and Herzegovina"],[1781312400,"USA","Paraguay"],[1781377200,"Qatar","Switzerland"],[1781388000,"Brazil","Morocco"],[1781398800,"Haiti","Scotland"],[1781409600,"Australia","Türkiye"],[1781456400,"Germany","Curaçao"],[1781467200,"Netherlands","Japan"],[1781478000,"Côte d'Ivoire","Ecuador"],[1781488800,"Sweden","Tunisia"],[1781539200,"Spain","Cabo Verde"],[1781550000,"Belgium","Egypt"],[1781560800,"Saudi Arabia","Uruguay"],[1781571600,"IR Iran","New Zealand"],[1781636400,"France","Senegal"],[1781647200,"Iraq","Norway"],[1781658000,"Argentina","Algeria"],[1781668800,"Austria","Jordan"],[1781715600,"Portugal","Congo DR"],[1781726400,"England","Croatia"],[1781737200,"Ghana","Panama"],[1781748000,"Uzbekistan","Colombia"],[1781798400,"Czechia","South Africa"],[1781809200,"Switzerland","Bosnia and Herzegovina"],[1781820000,"Canada","Qatar"],[1781830800,"Mexico","Korea Republic"],[1781895600,"USA","Australia"],[1781906400,"Scotland","Morocco"],[1781917200,"Brazil","Haiti"],[1781928000,"Türkiye","Paraguay"],[1781974800,"Netherlands","Sweden"],[1781985600,"Germany","Côte d'Ivoire"],[1782000000,"Ecuador","Curaçao"],[1782014400,"Tunisia","Japan"],[1782057600,"Spain","Saudi Arabia"],[1782068400,"Belgium","IR Iran"],[1782079200,"Uruguay","Cabo Verde"],[1782090000,"New Zealand","Egypt"],[1782147600,"Argentina","Austria"],[1782162000,"France","Iraq"],[1782172800,"Norway","Senegal"],[1782183600,"Jordan","Algeria"],[1782234000,"Portugal","Uzbekistan"],[1782244800,"England","Ghana"],[1782255600,"Panama","Croatia"],[1782266400,"Colombia","Congo DR"],[1782327600,"Switzerland","Canada"],[1782327600,"Bosnia and Herzegovina","Qatar"],[1782338400,"Scotland","Brazil"],[1782338400,"Morocco","Haiti"],[1782349200,"Czechia","Mexico"],[1782349200,"South Africa","Korea Republic"],[1782417600,"Curaçao","Côte d'Ivoire"],[1782417600,"Ecuador","Germany"],[1782428400,"Japan","Sweden"],[1782428400,"Tunisia","Netherlands"],[1782439200,"Türkiye","USA"],[1782439200,"Paraguay","Australia"],[1782500400,"Norway","France"],[1782500400,"Senegal","Iraq"],[1782518400,"Cabo Verde","Saudi Arabia"],[1782518400,"Uruguay","Spain"],[1782529200,"Egypt","IR Iran"],[1782529200,"New Zealand","Belgium"],[1782594000,"Panama","England"],[1782594000,"Croatia","Ghana"],[1782603000,"Colombia","Portugal"],[1782603000,"Congo DR","Uzbekistan"],[1782612000,"Algeria","Austria"],[1782612000,"Jordan","Argentina"],[1782673200,"","","Round of 32"],[1782752400,"","","Round of 32"],[1782765000,"","","Round of 32"],[1782781200,"","","Round of 32"],[1782838800,"","","Round of 32"],[1782853200,"","","Round of 32"],[1782867600,"","","Round of 32"],[1782921600,"","","Round of 32"],[1782936000,"","","Round of 32"],[1782950400,"","","Round of 32"],[1783018800,"","","Round of 32"],[1783033200,"","","Round of 32"],[1783047600,"","","Round of 32"],[1783101600,"","","Round of 32"],[1783116000,"","","Round of 32"],[1783128600,"","","Round of 32"],[1783184400,"","","Round of 16"],[1783198800,"","","Round of 16"],[1783281600,"","","Round of 16"],[1783296000,"","","Round of 16"],[1783364400,"","","Round of 16"],[1783382400,"","","Round of 16"],[1783440000,"","","Round of 16"],[1783454400,"","","Round of 16"],[1783627200,"","","Quarter-final"],[1783710000,"","","Quarter-final"],[1783803600,"","","Quarter-final"],[1783818000,"","","Quarter-final"],[1784055600,"","","Semi-final"],[1784142000,"","","Semi-final"],[1784408400,"","","Third-place play-off"],[1784487600,"","","The Final"]];
+const MATCH_WINDOW_MS = 115 * 60 * 1000; // kickoff → ~full time incl. half-time
+let tickerTimer = null;
+let tickerCycle = 0;
+
+function fixtureName(f) { return f[1] ? f[1] + ' v ' + f[2] : f[3]; }
+function estMinute(koMs, nowMs) {
+  // estimated from the clock, not live data — hence the "ish"
+  const m = Math.floor((nowMs - koMs) / 60000);
+  if (m <= 45) return m + '′ish';
+  if (m <= 60) return 'HT';
+  if (m <= 105) return (m - 15) + '′ish';
+  return '90′+';
+}
+function fmtCountdown(ms) {
+  const min = Math.ceil(ms / 60000);
+  if (min < 60) return min + 'M';
+  const h = Math.floor(min / 60);
+  if (h < 48) return h + 'H ' + (min % 60) + 'M';
+  return Math.floor(h / 24) + ' DAYS';
+}
+function tickerHTML(nowMs) {
+  const onNow = WC_FIXTURES.filter(f => nowMs >= f[0] * 1000 && nowMs < f[0] * 1000 + MATCH_WINDOW_MS);
+  if (onNow.length) {
+    const f = onNow[tickerCycle % onNow.length];
+    const more = onNow.length > 1 ? ' (+' + (onNow.length - 1) + ' more)' : '';
+    return '<span class="live-dot">●</span> <span class="tk-label">ON NOW</span> ' +
+           fixtureName(f) + ' · ' + estMinute(f[0] * 1000, nowMs) + more;
+  }
+  const next = WC_FIXTURES.find(f => f[0] * 1000 > nowMs);
+  if (next) {
+    return '<span class="tk-label">KICKOFF IN ' + fmtCountdown(next[0] * 1000 - nowMs) + '</span> ' +
+           fixtureName(next);
+  }
+  return 'Full time on the World Cup. The bars remain open.';
+}
+function updateTicker(nowMs) {
+  document.getElementById('ticker').innerHTML = tickerHTML(nowMs || Date.now());
+}
+function startTicker() {
+  clearInterval(tickerTimer);
+  updateTicker();
+  tickerTimer = setInterval(() => { tickerCycle++; updateTicker(); }, 8000);
+}
+
 /* ---------- loading line rotation ---------- */
 let loadingTimer = null;
 function startLoadingLines() {
@@ -849,6 +910,7 @@ async function start() {
   show('compass');
   renderBar();
   startHints();
+  startTicker();
   startAnimation();
 
   // 4. If motion was granted but no usable heading ever arrives, degrade too
